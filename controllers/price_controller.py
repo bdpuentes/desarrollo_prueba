@@ -1,33 +1,27 @@
-from flask import Flask, jsonify, request
-from flask_restful import reqparse, abort, Api, Resource
+from flask import request, jsonify
+from service.price_service import PriceService
 from datetime import datetime
-from repositories.price_repository import get_price
 
+class PriceController:
+    def __init__(self, price_service: PriceService):
+        self.price_service = price_service
 
-app = Flask(__name__)
+    def get_price(self):
+        try:
+            product_id = request.json['product_id']
+            brand_id = request.json['brand_id']
+            application_date = request.json['application_date']
 
-@app.route('/price', methods=['GET'])
-def price():
+            try:
+                datetime.strptime(application_date, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                return jsonify({"error": "Formato de fecha no valido"}), 400
 
-    product_id = reqparse.request.json['product_id']
-    brand_id = reqparse.request.json['brand_id']
-    application_date = reqparse.request.json['application_date']
-    #product_id = request.args.get('product_id')
-    #brand_id = request.args.get('brand_id')
-    #application_date = request.args.get('application_date')
+            price_info = self.price_service.find_price(product_id, brand_id, application_date)
 
-    if not product_id or not brand_id or not application_date:
-        return jsonify({"error": "Missing parameters"}), 400
-
-    try:
-        datetime.strptime(application_date, '%Y-%m-%d %H:%M:%S')
-    except ValueError:
-        return jsonify({"error": "Invalid date format"}), 400
-
-    price_info = get_price(product_id, brand_id, application_date)
-
-    if price_info:
-        return jsonify(price_info), 200
-    else:
-        return jsonify({"error": "Price not found"}), 404
-
+            if price_info:
+                return jsonify(price_info.to_dict()), 200
+            else:
+                return jsonify({"error": "No se encontró registro"}), 404
+        except KeyError:
+            return jsonify({"error": "Faltan parametros"}), 400

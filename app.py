@@ -7,16 +7,14 @@ from controllers.price_controller import PriceController
 
 conn = init_db()
 
-# Configuración de la aplicación
 app = Flask(__name__)
 api = Api(app)
 
-# Instancias de las capas
+# Se inicializan las instancias de las capas
 price_repository = PriceRepository(conn)
 price_service = PriceService(price_repository)
 price_controller = PriceController(price_service)
 
-# Ruta del endpoint
 @app.route('/price', methods=['GET'])
 def get_price():
     return price_controller.get_price()

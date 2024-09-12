@@ -20,7 +20,7 @@ class PriceController:
             price_info = self.price_service.find_price(product_id, brand_id, application_date)
 
             if price_info:
-                return jsonify(price_info.to_dict()), 200
+                return jsonify(price_info), 200
             else:
                 return jsonify({"error": "No se encontró registro"}), 404
         except KeyError:

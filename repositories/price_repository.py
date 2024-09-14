@@ -14,11 +14,28 @@ class PriceRepository:
              WHERE PRODUCT_ID = ? AND BRAND_ID = ?
                 AND ? BETWEEN START_DATE AND END_DATE
              ORDER BY PRIORITY DESC
+            LIMIT 1
              
         '''
         cursor.execute(query, (product_id, brand_id, application_date))
-        results = cursor.fetchall() 
+        #results = cursor.fetchall()
+        result = cursor.fetchone() 
         
+        if result:
+            return Price(
+                id_consulta=result[8],
+                product_id=result[0],
+                brand_id=result[1],
+                price_list=result[2],
+                start_date=result[3],
+                end_date=result[4],
+                price=result[5],
+                priority=result[6],
+                curr=result[7]
+            )
+        return None
+    
+        '''
         results_dict = [
             {
                 "id_consulta": row[8],
@@ -33,5 +50,6 @@ class PriceRepository:
             }
             for row in results
         ]
-        
+
         return results_dict
+        '''
